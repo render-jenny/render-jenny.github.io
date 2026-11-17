@@ -1,0 +1,11 @@
+# Handover
+
+Newest entry first. Each session adds an entry: what changed, problems (what went wrong, why, how it was fixed), what's next, open questions, and one thing worth learning.
+
+## 2026-11-17 (First version, set up with Foundation)
+
+- **What changed:** built the whole portfolio page in one session and set it up as a Foundation project: `CLAUDE.md`, decisions D001 to D005, a spec, `tests/check.mjs` (23 checks), Foundation's pre-commit and pre-push checks, CI (page checks and a secret scan of the history) and Dependabot for the Actions. The repo is public and served by GitHub Pages (D002); the owner approved both in the session.
+- **Problems:** (1) An early claim on the Bootcamp Connect card, "installs like an app and works offline", was untrue: it came from the project's README, which describes plans as built. The owner caught it; it was removed, and `CLAUDE.md` now says to describe a project by what it does today. (2) The Stone Island News demo video showed another publisher's whole article page for 17 seconds. That section was cut before the video went into the repo. (3) My test screenshots kept showing the sea at the wrong depth, because the page's own resize handler reset the value I forced during testing; the page was right, the test method wasn't.
+- **What's next:** (1) add a public contact address to the Contact section once the owner has made her free Proton address (not her private Gmail, which the checks keep off the page); (2) the owner confirms D003, D004 and D005; (3) decide whether the Stone Island News repo goes public, so its card can link to the code (Foundation's checklist first); (4) the owner looks at the page with the keyboard and at 320px wide, which headless checks can't judge; (5) re-record the Bootcamp Connect demo if the app changes.
+- **Open questions:** does the owner want the "industry standard products" phrase in the first box softened to "following industry standards"? Should Next.js, Prisma, SQLite and Gemini API stay in the skills list now that Jobseeker is no longer on the page?
+- **One thing worth learning:** a check that can never fail isn't a check. Before trusting `tests/check.mjs`, six faults were planted in a copy of the page, and it caught all six.

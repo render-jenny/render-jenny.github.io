@@ -1,0 +1,7 @@
+# Foundation: secrets stay out of git (this project has none; the rule stays in case that changes)
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store

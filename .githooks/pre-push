@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Foundation pre-push check. Work reaches main through a pull request, not a direct push
+# (software.md section 2). GitHub can't enforce this on a free account's private repos,
+# so this local check does. It can be skipped, so it guides rather than guarantees.
+#
+# Install in a project (the same folder as the pre-commit check):
+#   cp ../foundation/hooks/pre-push .githooks/pre-push
+#
+# Allowed: pushes to any other branch, and the first push that creates main in a new repo.
+# A push that changes code but not docs/handover.md gets a warning, never a block (F035).
+
+set -u
+push_sha=""
+
+# git gives one line per branch being pushed: local ref, local id, remote ref, remote id.
+# A remote id of all zeros means the branch doesn't exist on GitHub yet.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Remember the last branch being pushed (not a delete, not a tag) for the handover warning below.
+  case "$local_ref" in refs/heads/*) [[ "$local_sha" =~ ^0+$ ]] || push_sha="$local_sha" ;; esac
+  case "$remote_ref" in
+    refs/heads/main | refs/heads/master)
+      if [[ ! "$remote_sha" =~ ^0+$ ]]; then
+        printf '\nPush blocked: changes reach %s through a pull request, not a direct push.\n' "${remote_ref#refs/heads/}" >&2
+        printf 'Move your work to a branch with: git switch -c short-name\nThen push it and open a pull request: gh pr create\n' >&2
+        printf 'If the owner approved a direct push, use --no-verify and record why in the handover.\n\n' >&2
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+# A guide, not a block: a change to code should come with its handover entry in the same
+# pull request (software.md section 2, step 6). Skipped when there's no handover file or
+# no origin/main to compare with, and for Markdown-only changes.
+if [ -n "$push_sha" ] && [ -f docs/handover.md ] && git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  changed="$(git diff --name-only --no-renames "origin/main...$push_sha" 2>/dev/null)"
+  if printf '%s\n' "$changed" | grep -qv -e '\.md$' -e '^$' && ! printf '%s\n' "$changed" | grep -qx 'docs/handover.md'; then
+    printf '\nHeads-up: this branch changes code but not docs/handover.md. Software.md asks for the handover entry in the same pull request. This is a warning only.\n\n' >&2
+  fi
+fi
+exit 0

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# The fast checks the pre-commit hook runs. CI runs the same, plus a scan of the whole git history.
+set -e
+node tests/check.mjs
