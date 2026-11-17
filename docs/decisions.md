@@ -22,7 +22,7 @@ Important decisions for render-jenny.github.io, newest last: hard to undo, sets 
 - **Decision:** the portfolio page is a Foundation project: `CLAUDE.md` imports `../foundation/software.md`, with decisions, a handover, a spec, commit and push checks, and CI. It is a static page, so there are no package dependencies, linter or formatter to run (see D003).
 - **Why:** Foundation is the owner's way of working for every project, and the page needs to be editable safely in future, with saved versions and checks.
 - **Options considered:** leaving it as an unversioned folder (no history, no checks, nothing to publish from).
-- **Reviewed:** 2026-11-17, set up in a session with Claude; a fresh-subagent review before publishing is recorded in the handover.
+- **Reviewed:** 2026-11-17, set up in a session with Claude. A fresh-subagent review before publishing found no blockers (see the handover).
 
 ### D002 Host on GitHub Pages, from a public repo
 
