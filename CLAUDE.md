@@ -13,4 +13,4 @@ This project follows Foundation's software rules (imported above), adopted in D0
 - **What the page says must be true.** Describe a project by what it does today, not by what its README plans. Don't add a skill or a project the owner hasn't built, or a client name the client hasn't agreed to. Why: an unfinished claim ("works offline") had to be removed on 17 November 2026.
 - **The private email address stays off the page.** Use the public contact address the owner chooses. `tests/check.mjs` fails if any Gmail address appears.
 - **Demos use made-up data only,** and nothing from another publisher's site (cut from the Stone Island News video on 17 November 2026).
-- **Decisions:** [docs/decisions.md](docs/decisions.md). **Handover:** [docs/handover.md](docs/handover.md). **Changes:** [CHANGELOG.md](CHANGELOG.md). **Spec:** [specs/01-portfolio-page.md](specs/01-portfolio-page.md).
+- **Decisions:** [docs/decisions.md](docs/decisions.md). **Handover:** [docs/handover.md](docs/handover.md). **Changes:** [CHANGELOG.md](CHANGELOG.md). **Specs:** [01 page](specs/01-portfolio-page.md), [02 sound](specs/02-sound.md).
