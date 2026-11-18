@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-18: underwater sound (not yet live)
+
+- A "Sound" button beside the pause button, off until pressed. It plays a calm, endless soundtrack made in the browser: a soft pad of slow chords, water swells, a few bubbles and a faint bell, under a long echo. It gets more muffled as you scroll deeper.
+- Quiet bubble sounds on button presses and when a demo opens or closes (only while sound is on).
+- No audio files and nothing from other websites. Spec: [specs/02-sound.md](specs/02-sound.md).
+
 ## 2026-11-17: first version
 
 - Portfolio page: a sunlit sea that gets darker as you scroll, with pixel fish and a poke-able jellyfish, in light and dark.

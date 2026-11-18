@@ -2,6 +2,14 @@
 
 Newest entry first. Each session adds an entry: what changed, problems (what went wrong, why, how it was fixed), what's next, open questions, and one thing worth learning.
 
+## 2026-11-18 (Underwater sound)
+
+- **What changed:** added a Sound button (off by default) that plays a calm, endless underwater soundtrack made in the browser with the Web Audio API, plus quiet bubble sounds on button presses. Spec 02, three new checks (26 in total), issue #3. Open as a pull request, not merged: the owner has not yet listened to it.
+- **Problems:** I can't hear audio. So I checked what can be measured: the same code rendered offline in Chrome (peak -10 dBFS after the volume fix, steady loudness, no clipping), and the real button in Chrome (starts only on press, runs, then stops cleanly; no errors; no sideways scroll at 320px). The first render was too quiet (peak -16 dBFS) and was raised. How it sounds is for the owner to judge.
+- **What's next:** (1) the owner listens to the preview file, or presses Sound on the local page, and says what to change (too busy, too quiet, too dark); (2) merge when happy; (3) the earlier list still stands: contact email, D003 to D005, wording points, keyboard and 320px look, profile Website.
+- **Open questions:** should the choice be remembered between visits? (Not done: it would store something in the visitor's browser.)
+- **One thing worth learning:** write sound code so it can run on an offline audio context. Then it can be rendered to a file and measured without a speaker.
+
 ## 2026-11-17 (First version, set up with Foundation)
 
 - **What changed:** built the whole portfolio page in one session and set it up as a Foundation project: `CLAUDE.md`, decisions D001 to D005, a spec, `tests/check.mjs` (23 checks), Foundation's pre-commit and pre-push checks, CI (page checks and a secret scan of the history) and Dependabot for the Actions. Published on 17 November 2026: the repo is public and GitHub Pages serves https://render-jenny.github.io (D002); the owner approved both. Secret scanning, push protection and Dependabot alerts are on. A fresh reviewer (Sonnet, no part in building it) found no blockers; its wording points are under open questions. Before publishing, the Stone Island News video was also checked every 2 seconds (no other publisher's content) and the photos for location data (none).

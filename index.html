@@ -165,14 +165,19 @@
     .site-header .wrap { display: grid; justify-items: start; gap: .25rem; }
     .brand { font-weight: 900; color: var(--text-default); text-decoration: none; text-transform: uppercase; letter-spacing: .06em; }
     .handle { color: var(--text-default); font-size: .875rem; font-weight: 700; text-underline-offset: .2em; display: inline-flex; align-items: center; min-block-size: 1.5rem; }
-    .pause, .close { font: inherit; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; color: var(--text-on-raised); background: var(--surface-raised);
+    .pause, .sound, .close { font: inherit; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; color: var(--text-on-raised); background: var(--surface-raised);
       border: 3px solid var(--border-strong); padding: .25rem 1rem; min-block-size: 2.5rem; }
-    /* the pause button is small and sits in the bottom-right corner */
-    .pause { position: fixed; right: 1rem; bottom: 1rem; z-index: 20; font-size: .75rem; padding: .125rem .75rem; min-block-size: 2rem; border-width: 2px; }
+    /* the sound and pause buttons are small and sit together in the bottom-right corner */
+    .controls { position: fixed; right: 1rem; bottom: 1rem; z-index: 20; display: flex; gap: .5rem; }
+    .pause, .sound { font-size: .75rem; padding: .125rem .75rem; min-block-size: 2rem; border-width: 2px; }
+    /* sound is off until it is pressed; when it is on, the colours swap so the button looks pressed in */
+    .sound[aria-pressed="true"] { background: var(--text-on-raised); color: var(--surface-raised); }
     @media (max-width: 640px) {
-      .pause { font-size: 0; display: grid; place-items: center; min-inline-size: 2.25rem; min-block-size: 2.25rem; padding: 0; border-radius: 50%; }
-      .pause::before { content: "II"; font-size: .8rem; font-weight: 900; line-height: 1; letter-spacing: 0; }
+      .pause, .sound { font-size: 0; display: grid; place-items: center; min-inline-size: 2.25rem; min-block-size: 2.25rem; padding: 0; border-radius: 50%; }
+      .pause::before, .sound::before { content: "II"; font-size: .8rem; font-weight: 900; line-height: 1; letter-spacing: 0; }
       .pause[aria-pressed="true"]::before { content: "\25B6"; }
+      .sound::before { content: "\266A"; font-size: 1rem; text-decoration: line-through; }
+      .sound[aria-pressed="true"]::before { text-decoration: none; }
     }
 
     /* pixel seaweed growing up from a corner of three buttons and draping down over the edge */
@@ -368,7 +373,10 @@
       <div class="wrap"><p>© 2026 Jenny Shen</p></div>
     </footer>
 
-    <button class="pause" id="pause" type="button" aria-pressed="false">Pause the sea</button>
+    <div class="controls">
+      <button class="sound" id="sound" type="button" aria-pressed="false">Sound</button>
+      <button class="pause" id="pause" type="button" aria-pressed="false">Pause the sea</button>
+    </div>
   </div>
 
   <dialog class="demo" id="demo-sin" aria-labelledby="demo-sin-title">
@@ -526,6 +534,7 @@
     const root = document.documentElement, calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const depthUsers = sea.querySelectorAll(".water, .sun, .rays, .depth, .haze, .current, .layer.far, .layer.near");
     const layerEls = sea.querySelectorAll(".layer");
+    let sound = null;   // the sound engine while sound is on (see "Sound" below)
     let targetDepth = 0, depth = 0, mx = 0, my = 0, px = 0, py = 0, running = false;
     function readDepth() {
       const room = root.scrollHeight - innerHeight;
@@ -538,6 +547,7 @@
       if (Math.abs(targetDepth - depth) < 0.0004) depth = targetDepth;
       px += (mx - px) * 0.06; py += (my - py) * 0.06;
       paintDepth(depth);
+      sound?.setDepth(depth);   // the deeper the visitor goes, the more muffled the sound
       // a gentle shift with the mouse, eased so it never jumps; each layer moves by a different amount
       layerEls.forEach(l => { const d = +l.dataset.d; l.style.transform = `translate3d(${(-px * d * 18).toFixed(2)}px, ${(-py * d * 8).toFixed(2)}px, 0)`; });
       running = !(depth === targetDepth && Math.abs(mx - px) < 0.002 && Math.abs(my - py) < 0.002);
@@ -548,11 +558,141 @@
     addEventListener("resize", readDepth);
     readDepth();
 
+    /* ---------- Sound ----------
+       Everything is made by the browser (Web Audio), so the page has no audio files. makeSoundscape works on any audio
+       context, so the same code can be rendered offline to listen to or measure.
+       The pad cycles through four chords every 64 seconds. Bubbles, bells and the water swells are placed at random, so there is
+       no loop point to hear and the sound never starts to feel like a recording. Every chord uses only notes of D major, so any
+       two notes that overlap sound right together. */
+    const CHORDS = [[38,57,61,64,66], [47,54,57,61,64], [43,50,54,59,64], [45,52,59,62,64]];  // MIDI notes, the low root first
+    const BELL_NOTES = [74, 76, 78, 81, 83];
+    function makeSoundscape(ctx, mix = {}) {
+      const L = { pad: 1, water: 1, bubbles: 1, bells: 1, ...mix };
+      const midi = n => 440 * 2 ** ((n - 69) / 12), rand = (a, b) => a + Math.random() * (b - a), sr = ctx.sampleRate;
+      const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+      // under the water: a soft low-pass filter that closes as the visitor goes deeper
+      const water = ctx.createBiquadFilter(); water.type = "lowpass"; water.frequency.value = 3000; water.Q.value = 0.3; water.connect(master);
+      // a long, soft echo: noise that fades away over five seconds
+      const ir = ctx.createBuffer(2, sr * 5, sr);
+      for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) ** 3; }
+      const verb = ctx.createConvolver(); verb.buffer = ir; verb.connect(water);
+      const send = ctx.createGain(); send.gain.value = 0.5; send.connect(verb);
+      const bus = ctx.createGain(); bus.connect(water); bus.connect(send);
+      // button sounds skip the fade, so they answer at once
+      const sfxFilter = ctx.createBiquadFilter(); sfxFilter.type = "lowpass"; sfxFilter.frequency.value = 2200; sfxFilter.connect(ctx.destination);
+
+      // slow brown noise (a deep rumble, like water heard from inside); the ends are blended so it loops without a click
+      const fade = Math.floor(sr * 0.5), len = sr * 8, noise = ctx.createBuffer(2, len, sr);
+      for (let c = 0; c < 2; c++) {
+        const d = noise.getChannelData(c); let last = 0, peak = 0;
+        for (let i = 0; i < len; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last; peak = Math.max(peak, Math.abs(last)); }
+        for (let i = 0; i < len; i++) d[i] /= peak;
+        for (let i = 0; i < fade; i++) { const k = i / fade; d[i] = d[i] * k + d[len - fade + i] * (1 - k); }
+      }
+      function swell(t, centre, q, level, period) {
+        const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true; src.loopEnd = (len - fade) / sr;
+        const band = ctx.createBiquadFilter(); band.type = "bandpass"; band.frequency.value = centre; band.Q.value = q;
+        const g = ctx.createGain(); g.gain.value = level / 2;
+        const lfo = ctx.createOscillator(); lfo.frequency.value = 1 / period;
+        const rise = ctx.createGain(); rise.gain.value = level / 2; lfo.connect(rise); rise.connect(g.gain);        // loud, then quiet, then loud
+        const sweep = ctx.createGain(); sweep.gain.value = centre * 0.35; lfo.connect(sweep); sweep.connect(band.frequency);   // brighter as it rises
+        src.connect(band); band.connect(g); g.connect(bus); src.start(t); lfo.start(t);
+      }
+
+      function pad(t, notes) {
+        notes.forEach((n, i) => {
+          const env = ctx.createGain(), peak = (i === 0 ? 0.05 : 0.028) * L.pad, pan = ctx.createStereoPanner();
+          env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(peak, t + 5);    // each chord swells in over 5 seconds,
+          env.gain.setValueAtTime(peak, t + 16); env.gain.linearRampToValueAtTime(0, t + 22);   // and melts into the next over 6
+          pan.pan.value = i === 0 ? 0 : rand(-0.5, 0.5);
+          [["sine", 1], ["triangle", 0.3]].forEach(([type, level]) => {
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.type = type; o.frequency.value = midi(n); o.detune.value = rand(-6, 6); g.gain.value = level;
+            o.connect(g); g.connect(env); o.start(t); o.stop(t + 22.1);
+          });
+          env.connect(pan); pan.connect(bus);
+        });
+      }
+      function bubbles(t) {
+        const count = Math.random() < 0.35 ? 2 + Math.floor(Math.random() * 2) : 1, pan = rand(-0.7, 0.7);
+        let f = rand(450, 800);
+        for (let i = 0; i < count; i++) {
+          const at = t + i * rand(0.07, 0.18), o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+          o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * rand(1.7, 2.3), at + 0.1);
+          g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(0.05 * L.bubbles / (i + 1), at + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.14);
+          p.pan.value = pan; o.connect(g); g.connect(p); p.connect(bus); o.start(at); o.stop(at + 0.2);
+          f *= rand(1.1, 1.4);   // each bubble in a string is a little smaller, so a little higher
+        }
+      }
+      let lastBell = 0;
+      function bell(t) {
+        let n; do { n = BELL_NOTES[Math.floor(Math.random() * BELL_NOTES.length)]; } while (n === lastBell); lastBell = n;
+        const p = ctx.createStereoPanner(); p.pan.value = rand(-0.6, 0.6); p.connect(bus);
+        [[1, 0.02, 6], [2.01, 0.006, 3]].forEach(([ratio, level, dur]) => {   // a soft tone and a faint octave above it
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.value = midi(n) * ratio; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level * L.bells, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          o.connect(g); g.connect(p); o.start(t); o.stop(t + dur + 0.1);
+        });
+      }
+      // the button sound is a small bubble: up when something opens or happens, down when it closes
+      function sfx(kind) {
+        const t = ctx.currentTime, up = kind === "up", o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.setValueAtTime(up ? 330 : 520, t); o.frequency.exponentialRampToValueAtTime(up ? 760 : 260, t + 0.12);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.1, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+        o.connect(g); g.connect(sfxFilter); o.start(t); o.stop(t + 0.3);
+      }
+
+      let nextChord = 0, nextBubble = 0, nextBell = 0, chord = 0;
+      return {
+        begin(t) { nextChord = t; nextBubble = t + 2; nextBell = t + 6; swell(t, 450, 0.7, 0.06 * L.water, 11); swell(t, 1100, 0.9, 0.02 * L.water, 8.3); },
+        // places everything that starts before `until` (in seconds on the context's clock); called every half second while playing
+        schedule(until) {
+          const now = ctx.currentTime;
+          nextBubble = Math.max(nextBubble, now); nextBell = Math.max(nextBell, now);   // after a stall, never fire a pile of late sounds at once
+          while (nextChord < until) { pad(nextChord, CHORDS[chord++ % CHORDS.length]); nextChord += 16; }
+          while (nextBubble < until) { bubbles(nextBubble); nextBubble += rand(3, 9); }
+          while (nextBell < until) { bell(nextBell); nextBell += rand(8, 16); }
+        },
+        setDepth(d) { water.frequency.setTargetAtTime(3000 - d * 2000, ctx.currentTime, 0.5); },
+        fadeTo(level, seconds) { const t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.linearRampToValueAtTime(level * 2, t + seconds); },   // 2 = the soundtrack's loudest level: about -10 dBFS at its peak, quiet enough to sit under reading
+        sfx
+      };
+    }
+
+    /* The sound button. Sound is off until it is pressed, on every visit, and nothing is remembered (WCAG 1.4.2). The audio
+       context is only made on the press, because browsers won't start sound before the visitor does something. */
+    const soundBtn = document.getElementById("sound");
+    let audio = null, ticker = 0;
+    function setSound(on) {
+      soundBtn.setAttribute("aria-pressed", String(on));
+      clearInterval(ticker);
+      if (on) {
+        if (!audio) {
+          const ctx = new AudioContext(), engine = makeSoundscape(ctx);
+          audio = { ctx, engine }; engine.begin(ctx.currentTime + 0.1);
+        }
+        audio.ctx.resume(); audio.engine.setDepth(depth); audio.engine.fadeTo(1, 3); audio.engine.sfx("up");
+        const place = () => audio.engine.schedule(audio.ctx.currentTime + 3);
+        place(); ticker = setInterval(place, 500); sound = audio.engine;
+      } else if (audio) {
+        sound = null; audio.engine.sfx("down"); audio.engine.fadeTo(0, 1.5);
+        setTimeout(() => { if (!sound) audio.ctx.suspend(); }, 1700);   // when it has faded, stop the clock so nothing runs
+      }
+    }
+    if (window.AudioContext) soundBtn.addEventListener("click", () => setSound(soundBtn.getAttribute("aria-pressed") !== "true"));
+    else soundBtn.hidden = true;
+    // sound stops while the tab is hidden and carries on from the same place when it comes back
+    document.addEventListener("visibilitychange", () => { if (sound) document.hidden ? audio.ctx.suspend() : audio.ctx.resume(); });
+    document.addEventListener("click", e => {
+      const b = sound && e.target.closest("a.btn, button");
+      if (b && b !== soundBtn && !b.matches(".close")) sound.sfx(b.matches(".pause") ? "down" : "up");   // the demo window's own close sound is below
+    });
+
     /* Demo window: a native dialog. The browser keeps focus inside it and Escape closes it. */
     document.querySelectorAll("[data-demo]").forEach(btn => btn.addEventListener("click", () => document.getElementById(btn.dataset.demo).showModal()));
     document.querySelectorAll("dialog.demo").forEach(d => {
       d.addEventListener("click", e => { if (e.target === d) d.close(); });
-      d.addEventListener("close", () => d.querySelector("video")?.pause());
+      d.addEventListener("close", () => { d.querySelector("video")?.pause(); sound?.sfx("down"); });
     });
 
     /* Pause button (visitors can stop all movement) */

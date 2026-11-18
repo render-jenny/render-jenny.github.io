@@ -25,6 +25,10 @@ check('there is a skip link', /class="skip-link" href="#main"/.test(html));
 check('there is exactly one h1', (html.match(/<h1[\s>]/g) || []).length === 1, `found ${(html.match(/<h1[\s>]/g) || []).length}`);
 check('visitors can pause the movement', /id="pause"/.test(html) && /aria-pressed/.test(html));
 
+check('visitors can switch the sound on (it starts off)', /id="sound"[^>]*aria-pressed="false"/.test(html));
+check('sound never starts by itself', !/<audio\b|autoplay/i.test(html) && !/\.resume\(\)/.test(html.split('function setSound')[0]));
+check('the page uses no audio files (the sound is made in the browser)', !/\.(mp3|wav|ogg|m4a|aac|flac)\b/i.test(html));
+
 // 2. No unfinished text, and the private email address never appears
 check('no placeholder text is left', !/PLACEHOLDER|lorem ipsum/i.test(html));
 check('no Gmail address is on the page (the public contact address is not a Gmail one)', !/@(gmail|googlemail)\.com/i.test(html));
