@@ -9,9 +9,9 @@ Closes issue #3. A calm soundtrack for the sea, and quiet sounds for the buttons
    - a slow, soft pad of long chords that change about every 16 seconds (a 64-second cycle that repeats);
    - a muffled, "heard from under the water" tone: the sound is filtered, and gets darker as the visitor scrolls deeper;
    - water moving: a quiet swell of filtered noise, rising and falling every 10 seconds or so;
-   - a few bubbles, one every 3 to 9 seconds, in two sizes (small and high, or big and low) that follow the depth: near the surface mostly small and high, deeper mostly big and lower, with a few small ones always left; and a very soft bell note every 8 to 16 seconds, struck gently and ringing away, with an echo on about 6 notes in 10;
+   - a few bubbles, one every 3 to 9 seconds, in two sizes (small and high, or big and low) that follow the depth: near the surface mostly small and high, deeper mostly big and lower, with a few small ones always left; and a short, soft melody: every 11 to 18 seconds, a phrase of two to four notes from a calm scale, played with a warm electric-piano tone that fades away, with an echo on about 6 notes in 10;
    - a long, soft echo (reverb) over everything.
-3. It stays uncluttered: never more than one bubble or bell at once in the foreground, and quiet overall (peak well below full volume).
+3. It stays uncluttered: never more than one bubble or melody phrase at once in the foreground, and quiet overall (peak well below full volume).
 4. Pressing the button again fades the sound out over about 1.5 seconds, then stops it. Turning it on fades in over about 3 seconds.
 5. Button sounds (only while sound is on): a soft rising "bloop" when a button or link-button is pressed and when a demo opens; a soft falling one when a demo closes or the pause button is used.
 6. The sound pauses while the tab is hidden and resumes when it is shown again, if sound is on.
