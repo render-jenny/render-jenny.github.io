@@ -13,7 +13,7 @@ Closes issue #3. A calm soundtrack for the sea, and quiet sounds for the buttons
    - a long, soft echo (reverb) over everything.
 3. It stays uncluttered: never more than one bubble or melody note at once in the foreground, and quiet overall (peak well below full volume).
 4. Pressing the button again fades the sound out over about 1.5 seconds, then stops it. Turning it on fades in over about 3 seconds.
-5. Button sounds (only while sound is on): a soft rising "bloop" when a button or link-button is pressed and when a demo opens; a soft falling one when a demo closes or the pause button is used.
+5. Button sounds (only while sound is on) are a sonar ping, written like a game's "yes" and "no". "Yes" (a button or link-button pressed, a demo opening, sound on, the sea playing) climbs a fourth, bright and open. "No" (a demo closing, sound off, the sea pausing) falls a fourth, shorter and duller. Each is two soft notes with no echo, in the soundtrack's key and louder than the soundtrack, which dips for a moment underneath. Poking a fish stays silent.
 6. The sound pauses while the tab is hidden and resumes when it is shown again, if sound is on.
 
 ## Acceptance criteria
