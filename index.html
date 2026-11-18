@@ -659,7 +659,7 @@
         let n; do { n = MELODY_NOTES[Math.floor(Math.random() * MELODY_NOTES.length)]; } while (n === lastNote); lastNote = n;
         note(t, n, true);
       }
-      // The button sounds are a sonar ping: two soft round notes, then a faint echo of the last one. They are written the way games
+      // The button sounds are a sonar ping: two soft round notes, with no echo. They are written the way games
       // signal yes and no: "yes" (a button pressed, something opening) climbs a fourth, A4 up to D5, and is bright, with a small lift into each
       // note; "no" (something closing) falls a fourth, D5 down to A4, and is shorter and duller, with a small sag into each note.
       // The notes are in the soundtrack's key, they are louder than the soundtrack, and the soundtrack dips under them.
@@ -676,7 +676,6 @@
         };
         ping(at, notes[0], 0.3, yes ? 0.07 : 0.06, yes ? 0.96 : 1.04);
         ping(at + 0.11, notes[1], 0.34, yes ? 0.16 : 0.12, yes ? 0.96 : 1.04);
-        ping(at + 0.35, notes[1], 0.1, 0.12, 1); ping(at + 0.6, notes[1], 0.035, 0.1, 1);   // the sonar echo, quieter each time
       }
 
       let nextChord = 0, nextBubble = 0, nextPhrase = 0, chord = 0;
