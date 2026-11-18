@@ -578,6 +578,13 @@
       const verb = ctx.createConvolver(); verb.buffer = ir; verb.connect(water);
       const send = ctx.createGain(); send.gain.value = 0.5; send.connect(verb);
       const bus = ctx.createGain(); bus.connect(water); bus.connect(send);
+      // two soft echoes, one on each side, that the bell notes can be sent into: each repeat is quieter and duller than the last
+      const echoSend = ctx.createGain(); echoSend.gain.value = 1;
+      [[0.46, 0.42, -0.6], [0.69, 0.38, 0.6]].forEach(([time, feedback, side]) => {
+        const delay = ctx.createDelay(2), tone = ctx.createBiquadFilter(), again = ctx.createGain(), pan = ctx.createStereoPanner();
+        delay.delayTime.value = time; tone.type = "lowpass"; tone.frequency.value = 1600; again.gain.value = feedback; pan.pan.value = side;
+        echoSend.connect(delay); delay.connect(tone); tone.connect(again); again.connect(delay); tone.connect(pan); pan.connect(bus);
+      });
       // button sounds skip the fade, so they answer at once
       const sfxFilter = ctx.createBiquadFilter(); sfxFilter.type = "lowpass"; sfxFilter.frequency.value = 2200; sfxFilter.connect(ctx.destination);
 
@@ -613,24 +620,28 @@
           env.connect(pan); pan.connect(bus);
         });
       }
+      // Bubbles come in two sizes, so they stay clear of the bell notes: small high ones, and big slow low ones.
       function bubbles(t) {
-        const count = Math.random() < 0.35 ? 2 + Math.floor(Math.random() * 2) : 1, pan = rand(-0.7, 0.7);
-        let f = rand(450, 800);
+        const big = Math.random() < 0.45, pan = rand(-0.7, 0.7);
+        const count = big ? 1 + Math.floor(Math.random() * 2) : Math.random() < 0.35 ? 2 + Math.floor(Math.random() * 2) : 1;
+        let f = big ? rand(170, 300) : rand(450, 800);
         for (let i = 0; i < count; i++) {
-          const at = t + i * rand(0.07, 0.18), o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
-          o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * rand(1.7, 2.3), at + 0.1);
-          g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(0.05 * L.bubbles / (i + 1), at + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.14);
-          p.pan.value = pan; o.connect(g); g.connect(p); p.connect(bus); o.start(at); o.stop(at + 0.2);
+          const at = t + i * rand(0.12, 0.3) * (big ? 1.6 : 0.6), o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+          const rise = big ? 0.18 : 0.1, life = big ? 0.3 : 0.14;
+          o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * (big ? rand(1.4, 1.8) : rand(1.7, 2.3)), at + rise);
+          g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime((big ? 0.09 : 0.05) * L.bubbles / (i + 1), at + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, at + life);
+          p.pan.value = pan; o.connect(g); g.connect(p); p.connect(bus); o.start(at); o.stop(at + life + 0.06);
           f *= rand(1.1, 1.4);   // each bubble in a string is a little smaller, so a little higher
         }
       }
       let lastBell = 0;
       function bell(t) {
         let n; do { n = BELL_NOTES[Math.floor(Math.random() * BELL_NOTES.length)]; } while (n === lastBell); lastBell = n;
-        const p = ctx.createStereoPanner(); p.pan.value = rand(-0.6, 0.6); p.connect(bus);
+        const p = ctx.createStereoPanner(), echo = ctx.createGain(); p.pan.value = rand(-0.6, 0.6); p.connect(bus);
+        echo.gain.value = Math.random() < 0.6 ? 0.7 : 0; p.connect(echo); echo.connect(echoSend);   // about 6 notes in 10 are echoed
         [[1, 0.02, 6], [2.01, 0.006, 3]].forEach(([ratio, level, dur]) => {   // a soft tone and a faint octave above it
-          const o = ctx.createOscillator(), g = ctx.createGain();
-          o.frequency.value = midi(n) * ratio; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level * L.bells, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          const o = ctx.createOscillator(), g = ctx.createGain();   // the slow swell in (not a pluck) keeps it apart from the bubbles
+          o.frequency.value = midi(n) * ratio; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level * L.bells, t + 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
           o.connect(g); g.connect(p); o.start(t); o.stop(t + dur + 0.1);
         });
       }
