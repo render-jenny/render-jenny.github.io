@@ -561,7 +561,7 @@
     /* ---------- Sound ----------
        Everything is made by the browser (Web Audio), so the page has no audio files. makeSoundscape works on any audio
        context, so the same code can be rendered offline to listen to or measure.
-       The pad cycles through four chords every 64 seconds. Bubbles, the melody and the water swells are placed at random, so there is
+       The pad cycles through four chords every 64 seconds. Bubbles, the melody notes and the water swells are placed at random, so there is
        no loop point to hear and the sound never starts to feel like a recording. Every chord uses only notes of D major, so any
        two notes that overlap sound right together. */
     const CHORDS = [[38,57,61,64,66], [47,54,57,61,64], [43,50,54,59,64], [45,52,59,62,64]];  // MIDI notes, the low root first
@@ -639,7 +639,7 @@
       }
       // The melody is a soft electric-piano note: a round, warm tone that fades away on its own. Its pitch holds steady and it has
       // overtones that are whole multiples of the note, so it sits in the key with the pad, and it sounds quite unlike a bubble,
-      // which slides upwards in pitch and has no overtones. A phrase is two to four notes that step up or down the scale.
+      // which slides upwards in pitch and has no overtones. The notes are sparse: one at a time, never the same note twice running.
       let lastNote = 0;
       function note(t, n, last) {
         const p = ctx.createStereoPanner(), echo = ctx.createGain(), tone = ctx.createBiquadFilter();
@@ -654,15 +654,9 @@
           o.connect(g); g.connect(tone); o.start(t); o.stop(t + 0.02 + tau * 7);
         });
       }
-      function phrase(t) {
-        let i = 2 + Math.floor(Math.random() * 4);
-        const count = 2 + Math.floor(Math.random() * 3);
-        for (let k = 0; k < count; k++) {
-          note(t, MELODY_NOTES[i], k === count - 1);
-          t += rand(0.75, 1.25);
-          let step; do { step = Math.floor(Math.random() * 5) - 2; } while (step === 0 || !MELODY_NOTES[i + step]);   // up or down one or two steps, never off the ends
-          i += step;
-        }
+      function single(t) {
+        let n; do { n = MELODY_NOTES[Math.floor(Math.random() * MELODY_NOTES.length)]; } while (n === lastNote); lastNote = n;
+        note(t, n, true);
       }
       // the button sound is a small bubble: up when something opens or happens, down when it closes
       function sfx(kind) {
@@ -681,7 +675,7 @@
           nextBubble = Math.max(nextBubble, now); nextPhrase = Math.max(nextPhrase, now);   // after a stall, never fire a pile of late sounds at once
           while (nextChord < until) { pad(nextChord, CHORDS[chord++ % CHORDS.length]); nextChord += 16; }
           while (nextBubble < until) { bubbles(nextBubble); nextBubble += rand(3, 9); }
-          while (nextPhrase < until) { phrase(nextPhrase); nextPhrase += rand(11, 18); }
+          while (nextPhrase < until) { single(nextPhrase); nextPhrase += rand(8, 16); }
         },
         setDepth(d, at = ctx.currentTime) { deep = d; water.frequency.setTargetAtTime(3000 - d * 2000, at, 0.5); },
         fadeTo(level, seconds) { const t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.linearRampToValueAtTime(level * 2, t + seconds); },   // 2 = the soundtrack's loudest level: about -10 dBFS at its peak, quiet enough to sit under reading
