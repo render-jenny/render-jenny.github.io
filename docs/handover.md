@@ -2,6 +2,14 @@
 
 Newest entry first. Each session adds an entry: what changed, problems (what went wrong, why, how it was fixed), what's next, open questions, and one thing worth learning.
 
+## 2026-11-18 (Sound mix)
+
+- **What changed:** the button sounds are now two quick soft notes in the soundtrack's key (D5 and A5, rising or falling), about 4 to 5 dB louder than the soundtrack, and the soundtrack dips for a moment underneath each one. Before, they were a bubble-like slide in the same pitch range as the bubbles and the melody, and quieter than the soundtrack. Issue #5; open as a pull request until the owner has listened.
+- **Problems:** my first fix was still quieter than the soundtrack when measured (the button sound's loudness was -25 dBFS against the soundtrack's -21), so I raised it and measured again: about -18.4 against -22, peak -4 dBFS, no clipping. I can't hear it, so how it sounds is for the owner to judge.
+- **What's next:** the owner listens to `underwater-preview-v8.wav` (button sounds at 20, 40, 60 and 80 seconds) and says what to change; then merge.
+- **Open questions:** none new.
+- **One thing worth learning:** "louder" is easy to claim and easy to get wrong; measuring the first attempt showed it was still quieter.
+
 ## 2026-11-18 (Underwater sound)
 
 - **What changed:** added a Sound button (off by default) that plays a calm, endless underwater soundtrack made in the browser with the Web Audio API, plus quiet bubble sounds on button presses. Spec 02, three new checks (26 in total), issue #3. Open as a pull request, not merged: the owner has not yet listened to it.

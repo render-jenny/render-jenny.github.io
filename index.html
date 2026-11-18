@@ -571,7 +571,9 @@
       const midi = n => 440 * 2 ** ((n - 69) / 12), rand = (a, b) => a + Math.random() * (b - a), sr = ctx.sampleRate;
       const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
       // under the water: a soft low-pass filter that closes as the visitor goes deeper
-      const water = ctx.createBiquadFilter(); water.type = "lowpass"; water.frequency.value = 3000; water.Q.value = 0.3; water.connect(master);
+      const water = ctx.createBiquadFilter(); water.type = "lowpass"; water.frequency.value = 3000; water.Q.value = 0.3;
+      // the soundtrack dips for a moment under each button sound, so the button sound is clear without having to be shouted
+      const duck = ctx.createGain(); water.connect(duck); duck.connect(master);
       // a long, soft echo: noise that fades away over five seconds
       const ir = ctx.createBuffer(2, sr * 5, sr);
       for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) ** 3; }
@@ -657,12 +659,20 @@
         let n; do { n = MELODY_NOTES[Math.floor(Math.random() * MELODY_NOTES.length)]; } while (n === lastNote); lastNote = n;
         note(t, n, true);
       }
-      // the button sound is a small bubble: up when something opens or happens, down when it closes
-      function sfx(kind) {
-        const t = ctx.currentTime, up = kind === "up", o = ctx.createOscillator(), g = ctx.createGain();
-        o.frequency.setValueAtTime(up ? 330 : 520, t); o.frequency.exponentialRampToValueAtTime(up ? 760 : 260, t + 0.12);
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.1, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
-        o.connect(g); g.connect(sfxFilter); o.start(t); o.stop(t + 0.3);
+      // The button sound is two quick, soft notes from the same key as the soundtrack, so it can't clash with it: rising (D5 then A5)
+      // when something opens or happens, falling (A5 then D5) when it closes. It is louder than the soundtrack and a different shape
+      // from the bubbles (two steady notes, not a slide), so it stands out. The soundtrack dips under it.
+      function sfx(kind, at = ctx.currentTime) {
+        const notes = kind === "up" ? [74, 81] : [81, 74];
+        duck.gain.cancelScheduledValues(at); duck.gain.setTargetAtTime(0.35, at, 0.03); duck.gain.setTargetAtTime(1, at + 0.4, 0.3);
+        notes.forEach((n, i) => {
+          const t = at + i * 0.075;
+          [[1, 0.38], [2, 0.07]].forEach(([mult, level]) => {
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.frequency.value = midi(n) * mult; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + 0.01); g.gain.setTargetAtTime(0, t + 0.01, 0.07);
+            o.connect(g); g.connect(sfxFilter); o.start(t); o.stop(t + 0.6);
+          });
+        });
       }
 
       let nextChord = 0, nextBubble = 0, nextPhrase = 0, chord = 0;
