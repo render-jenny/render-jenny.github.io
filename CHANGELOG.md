@@ -3,7 +3,7 @@
 ## 2026-11-18: underwater sound (not yet live)
 
 - A "Sound" button beside the pause button, off until pressed. It plays a calm, endless soundtrack made in the browser: a soft pad of slow chords, water swells, a few bubbles and a faint bell, under a long echo. It gets more muffled as you scroll deeper.
-- Bubbles come in two sizes (small and high, big and low); the bell swells in and about 6 in 10 notes have a soft echo.
+- Bubbles come in two sizes (small and high, big and low) and sink lower as you scroll deeper; the bell is struck gently and rings away, and about 6 in 10 notes have a soft echo.
 - Quiet bubble sounds on button presses and when a demo opens or closes (only while sound is on).
 - No audio files and nothing from other websites. Spec: [specs/02-sound.md](specs/02-sound.md).
 
