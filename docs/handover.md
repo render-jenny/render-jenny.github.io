@@ -4,7 +4,7 @@ Newest entry first. Each session adds an entry: what changed, problems (what wen
 
 ## 2026-11-18 (Sound mix)
 
-- **What changed:** the button sounds are now two quick soft notes in the soundtrack's key (D5 and A5, rising or falling), about 4 to 5 dB louder than the soundtrack, and the soundtrack dips for a moment underneath each one. Before, they were a bubble-like slide in the same pitch range as the bubbles and the melody, and quieter than the soundtrack. Issue #5; open as a pull request until the owner has listened.
+- **What changed:** the button sounds are now a sonar ping in the soundtrack's key: a bright pair of notes climbing a fourth (A4 to D5) with a faint echo for "yes" (press, open, on, play), and a shorter, duller pair falling a fourth for "no" (close, off, pause). The owner chose the sonar idea from an options page; they are louder than the soundtrack, and the soundtrack dips for a moment underneath each one. Before, they were a bubble-like slide in the same pitch range as the bubbles and the melody, and quieter than the soundtrack. Issue #5; open as a pull request until the owner has listened.
 - **Problems:** my first fix was still quieter than the soundtrack when measured (the button sound's loudness was -25 dBFS against the soundtrack's -21), so I raised it and measured again: about -18.4 against -22, peak -4 dBFS, no clipping. I can't hear it, so how it sounds is for the owner to judge.
 - **What's next:** the owner listens to `underwater-preview-v8.wav` (button sounds at 20, 40, 60 and 80 seconds) and says what to change; then merge.
 - **Open questions:** none new.

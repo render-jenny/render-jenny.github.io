@@ -659,20 +659,24 @@
         let n; do { n = MELODY_NOTES[Math.floor(Math.random() * MELODY_NOTES.length)]; } while (n === lastNote); lastNote = n;
         note(t, n, true);
       }
-      // The button sound is two quick, soft notes from the same key as the soundtrack, so it can't clash with it: rising (D5 then A5)
-      // when something opens or happens, falling (A5 then D5) when it closes. It is louder than the soundtrack and a different shape
-      // from the bubbles (two steady notes, not a slide), so it stands out. The soundtrack dips under it.
+      // The button sounds are a sonar ping: two soft round notes, then a faint echo of the last one. They are written the way games
+      // signal yes and no: "yes" (a button pressed, something opening) climbs a fourth, A4 up to D5, and is bright, with a small lift into each
+      // note; "no" (something closing) falls a fourth, D5 down to A4, and is shorter and duller, with a small sag into each note.
+      // The notes are in the soundtrack's key, they are louder than the soundtrack, and the soundtrack dips under them.
       function sfx(kind, at = ctx.currentTime) {
-        const notes = kind === "up" ? [74, 81] : [81, 74];
+        const yes = kind === "up", notes = yes ? [69, 74] : [74, 69];
         duck.gain.cancelScheduledValues(at); duck.gain.setTargetAtTime(0.35, at, 0.03); duck.gain.setTargetAtTime(1, at + 0.4, 0.3);
-        notes.forEach((n, i) => {
-          const t = at + i * 0.075;
-          [[1, 0.38], [2, 0.07]].forEach(([mult, level]) => {
-            const o = ctx.createOscillator(), g = ctx.createGain();
-            o.frequency.value = midi(n) * mult; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + 0.01); g.gain.setTargetAtTime(0, t + 0.01, 0.07);
-            o.connect(g); g.connect(sfxFilter); o.start(t); o.stop(t + 0.6);
-          });
-        });
+        const tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = yes ? 3200 : 1500; tone.connect(sfxFilter);
+        const ping = (t, n, level, tau, bend) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.setValueAtTime(midi(n) * bend, t); o.frequency.exponentialRampToValueAtTime(midi(n), t + 0.04);
+          g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + 0.012); g.gain.setTargetAtTime(0, t + 0.012, tau);
+          o.connect(g); g.connect(tone); o.start(t); o.stop(t + tau * 8);
+          if (yes) { const h = ctx.createOscillator(), hg = ctx.createGain(); h.frequency.value = midi(n) * 2; hg.gain.setValueAtTime(0, t); hg.gain.linearRampToValueAtTime(level * 0.12, t + 0.012); hg.gain.setTargetAtTime(0, t + 0.012, tau / 2); h.connect(hg); hg.connect(tone); h.start(t); h.stop(t + tau * 4); }
+        };
+        ping(at, notes[0], 0.3, yes ? 0.07 : 0.06, yes ? 0.96 : 1.04);
+        ping(at + 0.11, notes[1], 0.34, yes ? 0.16 : 0.12, yes ? 0.96 : 1.04);
+        ping(at + 0.35, notes[1], 0.1, 0.12, 1); ping(at + 0.6, notes[1], 0.035, 0.1, 1);   // the sonar echo, quieter each time
       }
 
       let nextChord = 0, nextBubble = 0, nextPhrase = 0, chord = 0;
