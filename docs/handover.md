@@ -4,9 +4,9 @@ Newest entry first. Each session adds an entry: what changed, problems (what wen
 
 ## 2026-11-19 (Louder button sounds)
 
-- **What changed:** the button sounds are about 4 dB louder and the soundtrack about 2 dB quieter, so the button sounds now sit about 12 dB above the music while they play (before, about 6 dB), and the soundtrack dips a little deeper under them. Issue #7; open as a pull request until the owner has listened.
-- **Problems:** none. Measured in Chrome: the button sounds peak at -2.9 dBFS (no clipping); the soundtrack's own peak fell from about -9 to -12 dBFS.
-- **What's next:** the owner listens to `underwater-preview-v11.wav` and says if the gap is right, then merge.
+- **What changed:** the button sounds are about 2 dB louder and the soundtrack about 2 dB quieter, so the button sounds now sit about 9 dB above the music while they play (before, about 6 dB; a first try at 12 dB was too loud for the owner), and the soundtrack dips a little deeper under them. Issue #7; open as a pull request until the owner has listened.
+- **Problems:** none. Measured in Chrome: the button sounds peak at -4.4 dBFS (no clipping); the soundtrack's own peak fell from about -9 to -12 dBFS.
+- **What's next:** the owner listens to `underwater-preview-v12.wav` and says if the gap is right, then merge.
 - **Open questions:** none new.
 - **One thing worth learning:** a louder sound effect and a quieter backing track together move the balance further than raising either alone, and leave room before clipping.
 
