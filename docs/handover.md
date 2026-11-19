@@ -2,6 +2,14 @@
 
 Newest entry first. Each session adds an entry: what changed, problems (what went wrong, why, how it was fixed), what's next, open questions, and one thing worth learning.
 
+## 2026-11-19 (Louder button sounds)
+
+- **What changed:** the button sounds are about 2 dB louder and the soundtrack about 2 dB quieter, so the button sounds now sit about 9 dB above the music while they play (before, about 6 dB; a first try at 12 dB was too loud for the owner), and the soundtrack dips a little deeper under them. Issue #7; open as a pull request until the owner has listened.
+- **Problems:** none. Measured in Chrome: the button sounds peak at -4.4 dBFS (no clipping); the soundtrack's own peak fell from about -9 to -12 dBFS.
+- **What's next:** the owner listens to `underwater-preview-v12.wav` and says if the gap is right, then merge.
+- **Open questions:** none new.
+- **One thing worth learning:** a louder sound effect and a quieter backing track together move the balance further than raising either alone, and leave room before clipping.
+
 ## 2026-11-18 (Sound mix)
 
 - **What changed:** the button sounds are now a sonar-style pair of notes in the soundtrack's key, with no echo: a bright pair of notes climbing a fourth (A4 to D5) for "yes" (press, open, on, play), and a shorter, duller pair falling a fourth for "no" (close, off, pause). The owner chose the sonar idea from an options page; they are louder than the soundtrack, and the soundtrack dips for a moment underneath each one. Before, they were a bubble-like slide in the same pitch range as the bubbles and the melody, and quieter than the soundtrack. Issue #5; open as a pull request until the owner has listened.
