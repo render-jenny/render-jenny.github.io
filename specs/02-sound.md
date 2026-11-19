@@ -15,11 +15,13 @@ Closes issue #3. A calm soundtrack for the sea, and quiet sounds for the buttons
 4. Pressing the button again fades the sound out over about 1.5 seconds, then stops it. Turning it on fades in over about 3 seconds.
 5. Button sounds (only while sound is on) are a sonar ping, written like a game's "yes" and "no". "Yes" (a button or link-button pressed, a demo opening, sound on, the sea playing) climbs a fourth, bright and open. "No" (a demo closing, sound off, the sea pausing) falls a fourth, shorter and duller. Each is two soft notes with no echo, in the soundtrack's key and louder than the soundtrack, which dips for a moment underneath. Poking a fish stays silent.
 6. The sound pauses while the tab is hidden and resumes when it is shown again, if sound is on.
+7. While sound is on, a small mixer sits above the buttons with two sliders, "Music" and "Effects" (the button sounds), each from 0 (silent) to 100. Both start at 70, the balance the page was tuned to; 100 is 3 dB louder than that. Moving a slider changes the level at once. Letting go of the Effects slider plays a button sound, so the visitor can hear it. The mixer is hidden while sound is off, and the settings are not stored.
 
 ## Acceptance criteria
 
 - The sound button is a real `button` with `aria-pressed`, a visible focus ring, a name that says what it does, and enough contrast in light and dark. It is reachable by keyboard.
 - It works at 320px wide without sideways scrolling and without covering anything important (it sits with the pause button).
+- Each slider has a visible label, can be moved with the arrow keys, has a visible focus ring, and is at least 1.5rem tall.
 - It is still shown for visitors who reduce motion (sound isn't motion).
 - No sound starts before the visitor presses the button (WCAG 1.4.2).
 - `node tests/check.mjs` passes, and checks that the page still has no audio file or other website request.
@@ -27,4 +29,4 @@ Closes issue #3. A calm soundtrack for the sea, and quiet sounds for the buttons
 
 ## Not in this version
 
-Volume slider, saving the choice, hover sounds, music that follows the fish.
+Saving the sliders' settings, hover sounds, music that follows the fish.

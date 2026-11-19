@@ -26,6 +26,7 @@ check('there is exactly one h1', (html.match(/<h1[\s>]/g) || []).length === 1, `
 check('visitors can pause the movement', /id="pause"/.test(html) && /aria-pressed/.test(html));
 
 check('visitors can switch the sound on (it starts off)', /id="sound"[^>]*aria-pressed="false"/.test(html));
+check('the mixer has a labelled Music slider and Effects slider', /<label>Music <input id="mix-music" type="range"/.test(html) && /<label>Effects <input id="mix-fx" type="range"/.test(html));
 check('sound never starts by itself', !/<audio\b|autoplay/i.test(html) && !/\.resume\(\)/.test(html.split('function setSound')[0]));
 check('the page uses no audio files (the sound is made in the browser)', !/\.(mp3|wav|ogg|m4a|aac|flac)\b/i.test(html));
 
