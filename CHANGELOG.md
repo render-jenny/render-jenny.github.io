@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-19: mix sliders
+
+- While sound is on, a small mixer above the buttons has a Music slider and an Effects slider (0 to 100, both starting at 70, the balance the page was tuned to). Letting go of the Effects slider plays a button sound. Settings aren't stored.
+
 ## 2026-11-18: underwater sound
 
 - A "Sound" button beside the pause button, off until pressed. It plays a calm, endless soundtrack made in the browser: a soft pad of slow chords, water swells, a few bubbles and a sparse soft melody, under a long echo. It gets more muffled as you scroll deeper.

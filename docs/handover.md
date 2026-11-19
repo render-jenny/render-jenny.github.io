@@ -2,6 +2,14 @@
 
 Newest entry first. Each session adds an entry: what changed, problems (what went wrong, why, how it was fixed), what's next, open questions, and one thing worth learning.
 
+## 2026-11-19 (Mix sliders)
+
+- **What changed:** while sound is on, a small mixer above the buttons has a Music slider and an Effects slider (0 to 100, both starting at 70, the balance the page was tuned to; 100 is 3 dB louder, 0 is silent). Letting go of the Effects slider plays a button sound so the level can be heard. Hidden while sound is off; settings aren't stored. Issue #9, a new check (27 in total); open as a pull request until the owner has tried it.
+- **Problems:** my first offline measurement seemed to show the Music slider doing nothing at 100. The cause was the test, not the page: the left channel's loudness changes from run to run because each pad note is panned at random. Averaging six runs of both channels showed the slider works (+2.8 dB at 100, -13 dB at 35). Effects at 100 peaks at -1.1 dBFS, so nothing clips.
+- **What's next:** the owner tries the sliders on the local page, then merge. On a 320px-wide phone the mixer covers some text while it is open (as the two buttons already do); say if it should fold away.
+- **Open questions:** should the sliders' settings be remembered between visits? (Not done, to keep the page storing nothing.)
+- **One thing worth learning:** when a measurement contradicts a feature that obviously works elsewhere in the same test (the Effects slider worked), suspect the test's noise before the code.
+
 ## 2026-11-19 (Louder button sounds)
 
 - **What changed:** the button sounds are about 2 dB louder and the soundtrack about 2 dB quieter, so the button sounds now sit about 9 dB above the music while they play (before, about 6 dB; a first try at 12 dB was too loud for the owner), and the soundtrack dips a little deeper under them. Issue #7; open as a pull request until the owner has listened.
